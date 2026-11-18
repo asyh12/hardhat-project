@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Halal Nugget Tracker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#FDFBFE] font-sans min-h-screen">
+
+  <header class="bg-[#7F00FF] text-white py-6 shadow-md mb-6">
+    <div class="container mx-auto text-center">
+      <h1 class="text-3xl font-bold">Halal Supply Chain dApp</h1>
+      <p class="mt-2 text-gray-300">Track your products with transparency</p>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 space-y-6">
+
+    <section class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200">
+      <h2 class="text-xl font-semibold mb-3">Wallet Connection</h2>
+      <button class="bg-[#7F00FF] hover:bg-[#6600CC] text-white font-bold py-2 px-4 rounded transition-colors duration-200" onclick="connectWallet()">Connect MetaMask</button>
+      <p class="mt-2">Status: <span id="walletAddress" class="font-mono">Not Connected</span></p>
+    </section>
+
+    <section class="bg-white p-6 rounded-lg shadow-md flex flex-wrap gap-3 hover:shadow-xl transition-shadow duration-200">
+      <h2 class="w-full text-xl font-semibold mb-3">Select Role (Demo Mode)</h2>
+      
+      <button class="bg-[#E9914E] hover:bg-[#D87A3D] text-white py-2 px-4 rounded transition-colors duration-200" onclick="showView('admin')">Admin</button>
+      
+      <button class="bg-[#7F00FF] hover:bg-[#6600CC] text-white py-2 px-4 rounded transition-colors duration-200" onclick="showView('processing')">Processing Plant</button>
+      
+      <button class="bg-[#E9914E] hover:bg-[#D87A3D] text-white py-2 px-4 rounded transition-colors duration-200" onclick="showView('jakim')">JAKIM</button>
+      
+      <button class="bg-[#7F00FF] hover:bg-[#6600CC] text-white py-2 px-4 rounded transition-colors duration-200" onclick="showView('logistics')">Logistics</button>
+      
+      <button class="bg-[#E9914E] hover:bg-[#D87A3D] text-white py-2 px-4 rounded transition-colors duration-200" onclick="showView('retailer')">Retailer</button>
+      
+      <button class="bg-[#D9FD6D] hover:bg-[#C2E95A] text-black py-2 px-4 rounded transition-colors duration-200" onclick="showView('public')">Public User</button>
+    </section>
+
+    <section id="admin" class="hidden bg-[#7F00FF] p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200">
+      <h3 class="text-lg font-bold mb-2 text-white">Admin Panel</h3>
+      <p class="mb-4 text-sm text-yellow-200 border border-yellow-200 p-2 rounded"><strong>IMPORTANT:</strong> Assign BOTH 'FARM_SUPPLIER' and 'PROCESSING_PLANT' to the Processing Plant user so they can Create and Update batches.</p>
+      
+      <label class="block font-medium mb-1 text-white">User Address:</label>
+      <input class="w-full rounded p-2 mb-3 border border-gray-300 text-black" type="text" id="roleAddress" placeholder="0x...">
+      
+      <label class="block font-medium mb-1 text-white">Role:</label>
+      <select class="w-full rounded p-2 mb-3 border border-gray-300 text-black" id="roleSelect">
+        <option value="FARM_SUPPLIER">FARM_SUPPLIER (Required to Create)</option>
+        <option value="PROCESSING_PLANT">PROCESSING_PLANT (Required to Update)</option>
+        <option value="JAKIM">JAKIM</option>
+        <option value="LOGISTICS">LOGISTICS</option>
+        <option value="RETAILER">RETAILER</option>
+      </select>
+      <button class="bg-white text-[#7F00FF] hover:bg-gray-100 py-2 px-4 rounded transition-colors duration-200" onclick="assignRole()">Assign Role</button>
+    </section>
+
+    <section id="processing" class="hidden bg-[#E9914E] text-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200">
+      <h3 class="text-xl font-bold mb-4">Processing Plant Dashboard</h3>
+      
+      <div class="bg-black/10 p-4 rounded-lg mb-6 border border-white/20">
+        <h4 class="font-bold mb-2 text-lg">Step 1: Create New Batch</h4>
+        <label class="block font-medium mb-1 text-sm">Batch Details:</label>
+        <input class="w-full rounded p-2 mb-3 border border-gray-300 text-black" type="text" id="batchDetails" placeholder="Fresh Chicken Batch #101">
+        <button class="bg-[#C2E95A] hover:bg-[#A8D841] text-black py-2 px-4 rounded transition-colors duration-200" onclick="createBatch()">Create Batch</button>
+      </div>
+
+      <div class="bg-black/10 p-4 rounded-lg border border-white/20">
+        <h4 class="font-bold mb-2 text-lg">Step 2: Update Process Stage</h4>
+        <label class="block font-medium mb-1 text-sm">Batch ID:</label>
+        <input class="w-full rounded p-2 mb-3 border border-gray-300 text-black" type="number" id="processBatchId" min="0">
+        <label class="block font-medium mb-1 text-sm">New Stage:</label>
+        <select class="w-full rounded p-2 mb-3 border border-gray-300 text-black" id="processStage">
+          <option value="1">Slaughtered (1)</option>
+          <option value="2">Processed (2)</option>
+          <option value="3">Packaged (3)</option>
+        </select>
+        <button class="bg-[#D87A3D] hover:bg-[#BF6932] text-white border-2 border-white py-2 px-4 rounded transition-colors duration-200" onclick="updateStage()">Update Stage</button>
+      </div>
+    </section>
+
+    <section id="jakim" class="hidden bg-[#7F00FF] text-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200">
+      <h3 class="text-lg font-bold mb-2 text-white">Halal Authority (JAKIM)</h3>
+      <label class="block font-medium mb-1 text-white">Batch ID:</label>
+      <input class="w-full rounded p-2 mb-3 border border-gray-300 text-black" type="number" id="certBatchId" min="0">
+      <label class="block font-medium mb-1 text-white">Certificate Code:</label>
+      <input class="w-full rounded p-2 mb-3 border border-gray-300 text-black" type="text" id="certHash" placeholder="HALAL-CERT-2026-X">
+      <button class="bg-white text-[#7F00FF] hover:bg-gray-100 py-2 px-4 rounded transition-colors duration-200" onclick="certifyHalal()">Issue Certificate</button>
+    </section>
+
+    <section id="logistics" class="hidden bg-[#7F00FF] text-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200">
+      <h3 class="text-lg font-bold mb-2 text-white">Logistics</h3>
+      <p class="mb-3 text-sm text-gray-200">Record shipment for packaged batches.</p>
+      
+      <label class="block font-medium mb-1 text-white">Batch ID:</label>
+      <input class="w-full rounded p-2 mb-3 border border-gray-300 text-black" type="number" id="shipBatchId" placeholder="Enter Batch ID">
+      
+      <label class="block font-medium mb-1 text-white">Location:</label>
+      <input class="w-full rounded p-2 mb-3 border border-gray-300 text-black" type="text" id="shipLocation" placeholder="e.g. Selangor Warehouse">
+      
+      <label class="block font-medium mb-1 text-white">Status Note:</label>
+      <input class="w-full rounded p-2 mb-3 border border-gray-300 text-black" type="text" id="shipStatus" placeholder="e.g. In Transit">
+      
+      <button class="bg-white text-[#7F00FF] hover:bg-gray-100 py-2 px-4 rounded transition-colors duration-200" onclick="recordShipment()">Record Shipment</button>
+    </section>
+
+    <section id="retailer" class="hidden bg-[#E9914E] text-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200">
+      <h3 class="text-lg font-bold mb-2">Retailer</h3>
+      <p class="mb-3 text-sm text-gray-100">Confirm receipt of shipment.</p>
+      <label class="block font-medium mb-1">Batch ID:</label>
+      <input class="w-full rounded p-2 mb-3 border border-gray-300 text-black" type="number" id="retailBatchId" placeholder="Enter Batch ID">
+      <button class="bg-[#D87A3D] hover:bg-[#BF6932] text-white border-2 border-white py-2 px-4 rounded transition-colors duration-200" onclick="confirmReceived()">Confirm Receipt</button>
+    </section>
+
+    <section id="public" class="hidden bg-[#D9FD6D] text-black p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200">
+      <h3 class="text-lg font-bold mb-2">Consumer Tracking</h3>
+      <label class="block font-medium mb-1">Enter Batch ID:</label>
+      <input class="w-full rounded p-2 mb-3 border border-gray-300 text-black" type="number" id="trackBatchId" min="0">
+      <button class="bg-[#C2E95A] hover:bg-[#A8D841] text-black py-2 px-4 rounded transition-colors duration-200" onclick="getBatchDetails()">Track Product</button>
+      <div id="trackingResult" class="mt-4 border-t pt-2"></div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
